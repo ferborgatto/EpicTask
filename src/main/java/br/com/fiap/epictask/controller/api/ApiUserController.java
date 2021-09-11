@@ -23,66 +23,74 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import br.com.fiap.epictask.model.Signin;
+import br.com.fiap.epictask.model.User;
 import br.com.fiap.epictask.repository.UserRepository;
+
 
 @RestController
 @RequestMapping("/api/user")
 public class ApiUserController {
 	
 	@Autowired
-	private UserRepository userrepo;
+	private UserRepository repository;
 	
-	@GetMapping //userindex
+	@GetMapping()
 	@Cacheable("users")
-	public Page<Signin> userindex(@RequestParam(required = false) String username,
-			@PageableDefault Pageable pageable) {
-		if (username == null) return userrepo.findAll(pageable);
+	public Page<User> index(
+			@RequestParam(required = false) String email,
+			@PageableDefault(size = 20) Pageable pageable){
 		
-		return userrepo.findByUsernameContaining(username, pageable);
+		if(email == null) 
+			return repository.findAll(pageable);
+		return repository.findByEmailLike("%" + email + "%", pageable);
 	}
 	
-	@PostMapping //createuser
+	@PostMapping()
 	@CacheEvict(value = "users", allEntries = true)
-	public ResponseEntity<Signin> createuser(@RequestBody @Valid Signin user,
-			UriComponentsBuilder uriBuilder) {
-		userrepo.save(user);
-		URI uri = uriBuilder.path("api/user/{id}").buildAndExpand(user.getId()).toUri();
-		return ResponseEntity.created(uri).body(user);
+	public ResponseEntity<User> create(@RequestBody @Valid User user, UriComponentsBuilder uriBuilder) {
+		repository.save(user);
+		URI uri = uriBuilder
+					.path("/api/user/{id}")
+					.buildAndExpand(user.getId())
+					.toUri();
+		return ResponseEntity.created(uri).build();
 	}
 	
-	@GetMapping("{id}") //getuser
-	public ResponseEntity<Signin> getuser(@PathVariable Long id) {
-		Optional<Signin> user = userrepo.findById(id);
-
-		return ResponseEntity.of(user);
+	@GetMapping("{id}")
+	public ResponseEntity<User>  get(@PathVariable Long id) {
+		return ResponseEntity.of(repository.findById(id));
 	}
 	
-	@DeleteMapping("{id}") //delete
+	@DeleteMapping("{id}")
 	@CacheEvict(value = "users", allEntries = true)
-	public ResponseEntity<Signin> delete(@PathVariable Long id) {
-		Optional<Signin> user = userrepo.findById(id);
+	public ResponseEntity<User> delete(@PathVariable Long id){
+		Optional<User> user = repository.findById(id);
 		
-		if(user.isEmpty()) return ResponseEntity.notFound().build();
+		if(user.isEmpty()) 
+			return ResponseEntity.notFound().build() ;
 		
-		userrepo.deleteById(id);
+		repository.deleteById(id);
+		
 		return ResponseEntity.ok().build();
+		
 	}
 	
-	@PutMapping("{id}") //updateuser
+	@PutMapping("{id}")
 	@CacheEvict(value = "users", allEntries = true)
-	public ResponseEntity<Signin> updateuser(@PathVariable Long id, @RequestBody Signin newUser) {
-		Optional<Signin> optional = userrepo.findById(id);
+	public ResponseEntity<User> update(@RequestBody @Valid User newUser, @PathVariable Long id){
+		Optional<User> optional = repository.findById(id);
 		
-		if (optional.isEmpty()) return ResponseEntity.notFound().build();
+		if(optional.isEmpty()) 
+			return ResponseEntity.notFound().build() ;
 		
-		Signin user = optional.get();
-		user.setUsername(newUser.getUsername());
+		User user = optional.get();
+		
+		user.setName(newUser.getName());
 		user.setEmail(newUser.getEmail());
-		user.setPassword(newUser.getPassword());
+		user.setPass(newUser.getPass());
 		
-		userrepo.save(user);
+		repository.save(user);
+		
 		return ResponseEntity.ok(user);
 	}
-
 }

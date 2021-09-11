@@ -12,12 +12,13 @@ import springfox.documentation.spring.web.plugins.Docket;
 public class SwaggerConfig {
 	
 	@Bean
-	public Docket apiSwagger() {
-		
-		return new Docket(DocumentationType.SWAGGER_2).select()
+	public Docket apiConfig() {
+		return new Docket(DocumentationType.SWAGGER_2)
+				.select()
 				.apis(RequestHandlerSelectors.any())
 				.paths(PathSelectors.ant("/api/**"))
 				.build();
-		
+				
 	}
+
 }

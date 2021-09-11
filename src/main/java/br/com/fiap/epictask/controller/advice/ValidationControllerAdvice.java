@@ -10,27 +10,25 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import lombok.extern.slf4j.Slf4j;
-
 @RestControllerAdvice
-@Slf4j
 public class ValidationControllerAdvice {
-
+	
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	@ResponseStatus(code = HttpStatus.BAD_REQUEST)
-	public List<ValidationFieldError> handle(MethodArgumentNotValidException e) {
-		
+	public List<ValidationFieldError> handler(MethodArgumentNotValidException err) {
 		List<ValidationFieldError> list = new ArrayList<>();
-		List<FieldError> errors = e.getBindingResult().getFieldErrors();
+		
+		List<FieldError> errors = err.getBindingResult().getFieldErrors();
 		
 		errors.forEach(erro -> {
-			list.add(new ValidationFieldError(
-					erro.getField(), erro.getDefaultMessage()));
-			log.error("um erro de validação aconteceu - " + erro.getDefaultMessage());
+			list.add(
+					new ValidationFieldError(
+							erro.getField(), 
+							erro.getDefaultMessage()
+						));
 		});
-		 
-
+		
 		return list;
-		//return e.getBindingResult().getFieldErrors();
 	}
+
 }

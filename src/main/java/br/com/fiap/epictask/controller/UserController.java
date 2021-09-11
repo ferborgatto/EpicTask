@@ -12,34 +12,34 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
-import br.com.fiap.epictask.model.Task;
-import br.com.fiap.epictask.repository.TaskRepository;
+import br.com.fiap.epictask.model.User;
+import br.com.fiap.epictask.repository.UserRepository;
 
 @Controller
-public class TaskController {
+public class UserController {
 	
 	@Autowired
-	private TaskRepository repository;
+	private UserRepository repository;
 	
-	@GetMapping("/task")
+	
+	@GetMapping("/user")
 	public ModelAndView index() {
-		ModelAndView modelAndView = new ModelAndView("tasks");
-		List<Task> tasks = repository.findAll();
-		modelAndView.addObject("tasks", tasks );
+		ModelAndView modelAndView = new ModelAndView("users");
+		List<User> tasks = repository.findAll();
+		modelAndView.addObject("users", tasks );
 		return modelAndView;
 	}
-
-	@RequestMapping("/task/new")
-	public String create(Task task) {
-		return "task-form";
+	
+	@RequestMapping("/user/new")
+	public String create(User task) {
+		return "user-form";
 	}
 	
-	@PostMapping("/task")
-	public String save(@Valid Task task, BindingResult result) {
-		if(result.hasErrors()) return "task-form";
+	@PostMapping("/user")
+	public String save(@Valid User task, BindingResult result) {
+		if(result.hasErrors()) return "user-form";
 		repository.save(task);
-		return "tasks";
+		return "users";
 	}
-	
 
 }
